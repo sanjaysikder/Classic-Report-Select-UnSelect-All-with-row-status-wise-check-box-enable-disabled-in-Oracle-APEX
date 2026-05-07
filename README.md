@@ -55,22 +55,131 @@ This document provides a complete implementation guide for adding "Select / UnSe
 Create a Classic Report with the following SQL query:
 
 ```sql
-SELECT
+select A.PRIZE_WINNER_LINE_ID,
+       A.PRIZE_WINNER_LINE_ID DETAIL,
+   
+
+    --    APEX_ITEM.checkbox (
+    --        1,
+    --         A.PRIZE_WINNER_LINE_ID,
+    --           'class="chk_select" data-pi-id="'
+    --        ||  A.PRIZE_WINNER_LINE_ID
+    --        || '" style="width:18px;height:18px;cursor:pointer;"')
+    --        AS SELECTPI,
+
     APEX_ITEM.checkbox(
-        1,
-        A.PI_ID,
-        'class="chk_select" data-pi-id="' || A.PI_ID || 
-        '" data-status="' || NVL(A.APPROVAL_STATUS, 'PENDING') || 
-        '" style="width:18px;height:18px;cursor:pointer;"' ||
-        CASE WHEN A.APPROVAL_STATUS = 'APPROVED' THEN ' disabled' ELSE '' END
-    ) AS SELECTPI,
-    A.PI_NUMBER,
-    A.PI_DATE,
-    A.SUPPLIER_NAME,
-    A.APPROVAL_STATUS
-FROM CM_EXPORT_ATTACH_PI A
-WHERE A.EXPORT_LC_ID = :P48_EXPORT_LC_ID  -- Your filter condition
-ORDER BY A.PI_DATE DESC;
+           1,
+           A.PRIZE_WINNER_LINE_ID,
+           'class="chk_select" data-pi-id="' || A.PRIZE_WINNER_LINE_ID || '" style="width:18px;height:18px;cursor:pointer;"' ||
+           CASE WHEN A.DOCUMENTS_STATUS = 'VERIFIED' THEN ' disabled' ELSE '' END
+        ) AS SELECTPI,
+
+       A.WINNER_FIRST_NAME ||' '||A.WINNER_LAST_NAME WINNER_NAME,
+       A.WINNER_MIDDLE_NAME,
+       B.ORGANIZATION_EN CHANNEL_NAME,
+       C.PROGRAM_NAME,
+       A.CONTACT_NUMBER,
+       A.CONTACT_EMAIL,
+      
+       A.PRIZE_AMOUNT,
+       
+       A.REQUESTED_DATE,
+       A.REQUESTED_BY,
+       
+       A.PROGRAM_DATE,
+       A.EPISODE_NUMBER,
+       A.PRIZE_TYPE,
+       A.SUPPLIER_NAME,
+
+       CASE DOCUMENTS_STATUS
+    WHEN 'NEW' THEN 
+        '<span style="color:white;
+                      background-color:#91F527;
+                      padding:4px 8px;
+                      border-radius:4px;
+                      font-weight:bold;">
+         NEW</span>'
+
+    WHEN 'REQUESTED' THEN 
+        '<span style="color:white;
+                      background-color:blue;
+                      padding:4px 8px;
+                      border-radius:4px;
+                      font-weight:bold;">
+         REQUESTED</span>'
+
+    WHEN 'RECEIVED' THEN 
+        '<span style="color:white;
+                      background-color:green;
+                      padding:4px 8px;
+                      border-radius:4px;
+                      font-weight:bold;">
+         RECEIVED</span>'
+
+    ELSE 
+        '<span style="color:white;
+                      background-color:gray;
+                      padding:4px 8px;
+                      border-radius:4px;
+                      font-weight:bold;">'
+         || DOCUMENTS_STATUS || 
+        '</span>'
+      END AS DOCUMENTS_STATUS,
+
+     CASE WHEN A.APPROVAL_STATUS = 'APPROVED' THEN 
+       '<span style="color:white;
+                     background-color:blue;
+                     padding:4px 8px;
+                     border-radius:4px;
+                     font-weight:bold;">
+        APPROVED</span>'
+
+    WHEN A.APPROVAL_STATUS = 'WITH_CHANNEL_MANAGER' THEN 
+       '<span style="color:white;
+                     background-color:#91F527;
+                     padding:4px 8px;
+                     border-radius:4px;
+                     font-weight:bold;">
+        Waiting For C. Manager Approval</span>'
+
+ WHEN A.APPROVAL_STATUS = 'WITH_BUDGET_APPROVER' THEN 
+       '<span style="color:white;
+                     background-color:#91F527;
+                     padding:4px 8px;
+                     border-radius:4px;
+                     font-weight:bold;">
+        Waiting For Budget Approval</span>'
+
+    ELSE null
+       
+END AS APPROVAL_STATUS,
+  
+  
+     CASE 
+    WHEN DOCUMENTS_STATUS = 'NEW' THEN 
+
+        -- Update Button
+        '<a href="' || 
+        APEX_UTIL.PREPARE_URL(
+            p_url => 'f?p=' || v('APP_ID') || ':9:' || v('APP_SESSION') || 
+                     '::NO::P9_PRIZE_WINNER_LINE_ID:' || PRIZE_WINNER_LINE_ID,
+            p_checksum_type => 'SESSION'
+        ) || 
+        '" class="t-Button t-Button--small t-Button--warning" title="Update">
+            <span class="t-Icon fa fa-edit"></span>
+            <span class="t-Button-label">Update</span>
+        </a>'
+            ELSE null
+                
+          END 
+       AS ACTION
+
+
+  from XXDMI_PRIZE_WINNER_LINES A, DEPARTMENT_MASTER B, PROGRAM_MASTER C
+  WHERE A.CHANNEL_ID  = B.ORGANIZATION_ID
+  AND A.PROGRAM_ID  = C.PROGRAM_ID
+  AND (:P8_CHENNEL IS NULL OR  A.CHANNEL_ID = :P8_CHENNEL)
+  AND (:P8_PROGRAM IS NULL OR A.PROGRAM_ID= :P8_PROGRAM);
 ```
 ## 2. Chenge select column label/header
 
