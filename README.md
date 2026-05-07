@@ -59,20 +59,14 @@ select A.PRIZE_WINNER_LINE_ID,
        A.PRIZE_WINNER_LINE_ID DETAIL,
    
 
-    --    APEX_ITEM.checkbox (
-    --        1,
-    --         A.PRIZE_WINNER_LINE_ID,
-    --           'class="chk_select" data-pi-id="'
-    --        ||  A.PRIZE_WINNER_LINE_ID
-    --        || '" style="width:18px;height:18px;cursor:pointer;"')
-    --        AS SELECTPI,
+
 
     APEX_ITEM.checkbox(
            1,
            A.PRIZE_WINNER_LINE_ID,
            'class="chk_select" data-pi-id="' || A.PRIZE_WINNER_LINE_ID || '" style="width:18px;height:18px;cursor:pointer;"' ||
            CASE WHEN A.DOCUMENTS_STATUS = 'VERIFIED' THEN ' disabled' ELSE '' END
-        ) AS SELECTPI,
+        ) AS SELECWINER,
 
        A.WINNER_FIRST_NAME ||' '||A.WINNER_LAST_NAME WINNER_NAME,
        A.WINNER_MIDDLE_NAME,
